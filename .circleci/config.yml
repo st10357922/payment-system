@@ -3,8 +3,8 @@ version: 2.1
 executors:
   node-executor:
     docker:
-      - image: circleci/python:3.9  # You can change the image to Node if needed
-    working_directory: ~/repo
+      - image: circleci/python:3.9  # Change to a Node image if needed
+    working_directory: ~/repo/backend  # Set this to your backend folder
 
 jobs:
   build:
@@ -16,27 +16,27 @@ jobs:
           command: |
             curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
             sudo apt-get install -y nodejs
-            npm install
+            cd backend && npm install  # Ensure npm install is run inside the backend folder
       - run:
           name: Run Tests
-          command: npm test
+          command: cd backend && npm test  # Ensure tests run from the backend directory
       - run:
           name: Build Project
-          command: npm run build
+          command: cd backend && npm run build  # Build the project from the backend folder
 
   sonarQubeScan:
     docker:
       - image: sonarsource/sonar-scanner-cli:latest
-    working_directory: ~/repo
+    working_directory: ~/repo/backend  # Same as the build job (backend folder)
     steps:
       - checkout
       - run:
           name: Install SonarQube Scanner
-          command: npm install sonar-scanner --save-dev
+          command: cd backend && npm install sonar-scanner --save-dev  # Install sonar-scanner inside the backend folder
       - run:
           name: Run SonarQube Scanner
           command: |
-            sonar-scanner \
+            cd backend && sonar-scanner \
               -Dsonar.projectKey=st10357922_payment-system \
               -Dsonar.organization=st10357922 \
               -Dsonar.sources=src \
@@ -54,3 +54,4 @@ workflows:
       - sonarQubeScan:
           requires:
             - build
+
